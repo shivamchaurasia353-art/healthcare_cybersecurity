@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: healthsecure_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      SQLITE_PATH: /app/data/healthsecure.db
+    ports:
+      - "5000:5000"
+    volumes:
+      - sqlite_data:/app/data
+      - backend_logs:/app/logs
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: healthsecure_web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  vendor-demo:
+    image: nginx:alpine
+    container_name: healthsecure_vendor_demo
+    restart: unless-stopped
+    ports:
+      - "5001:80"
+    volumes:
+      - ./vendor-demo:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+
+volumes:
+  sqlite_data:
+    name: healthcare_cybersecurity_sqlite_data
+  backend_logs:
+    name: healthcare_cybersecurity_backend_logs

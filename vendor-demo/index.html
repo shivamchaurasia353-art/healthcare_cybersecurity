@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthSecure — Vendor Demo Portal</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f8; color: #1e293b; }
+    .header { background: #1e40af; color: white; padding: 16px 32px; display: flex; align-items: center; gap: 12px; }
+    .header h1 { font-size: 20px; font-weight: 700; }
+    .header .badge { background: #3b82f6; padding: 3px 10px; border-radius: 99px; font-size: 12px; }
+    .container { max-width: 1100px; margin: 32px auto; padding: 0 16px; display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
+    .sidebar { display: flex; flex-direction: column; gap: 16px; }
+    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .card h2 { font-size: 14px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; font-weight: 500; color: #64748b; margin-bottom: 4px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.15s; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #3b82f6; }
+    .field textarea { resize: vertical; min-height: 60px; }
+    .btn { padding: 9px 18px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover { background: #15803d; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-outline { background: white; border: 1px solid #e2e8f0; color: #475569; }
+    .btn-outline:hover { background: #f8fafc; }
+    .step { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+    .step:last-child { border-bottom: none; }
+    .step-num { width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+    .step-num.active { background: #2563eb; color: white; }
+    .step-num.done { background: #16a34a; color: white; }
+    .step-content h3 { font-size: 14px; font-weight: 600; color: #1e293b; }
+    .step-content p { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .main-panel { display: flex; flex-direction: column; gap: 20px; }
+    .panel { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .panel-title { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+    .panel-desc { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+    .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+    .alert-success { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; }
+    .alert-error { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; }
+    .alert-info { background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8; }
+    .alert-warning { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid transparent; }
+    .tag-inactive { background: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
+    .tag-active { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+    .tags-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .token-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 12px; word-break: break-all; color: #475569; }
+    .record-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .record-type { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+    .record-type.PRESCRIPTION { background: #dbeafe; color: #1d4ed8; }
+    .record-type.LAB_REPORT { background: #ede9fe; color: #6d28d9; }
+    .record-type.VACCINATION { background: #d1fae5; color: #065f46; }
+    .record-type.IMAGING { background: #dcfce7; color: #15803d; }
+    .record-type.DISCHARGE_SUMMARY { background: #ffedd5; color: #c2410c; }
+    .record-type.INSURANCE { background: #fef9c3; color: #92400e; }
+    .record-type.CONSULTATION { background: #fce7f3; color: #9d174d; }
+    .divider { border: none; border-top: 1px solid #f1f5f9; margin: 16px 0; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .status-badge { padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .status-PENDING { background: #fef9c3; color: #92400e; }
+    .status-APPROVED { background: #d1fae5; color: #065f46; }
+    .status-DENIED { background: #fee2e2; color: #991b1b; }
+    .mono { font-family: monospace; font-size: 12px; }
+    #api-key-status { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .loading { opacity: 0.6; pointer-events: none; }
+    @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" fill="rgba(255,255,255,0.3)" stroke="white" stroke-width="2"/><path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h1>HealthSecure — Vendor Demo Portal</h1>
+  <span class="badge">DigiLocker-style Consent</span>
+</div>
+
+<div class="container">
+  <!-- SIDEBAR: Steps + Auth -->
+  <div class="sidebar">
+    <div class="card">
+      <h2>Consent Flow Steps</h2>
+      <div class="step">
+        <div class="step-num" id="step1-num">1</div>
+        <div class="step-content">
+          <h3>Set Vendor API Key</h3>
+          <p>Authenticate as an approved vendor</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" id="step2-num">2</div>
+        <div class="step-content">
+          <h3>Request Consent</h3>
+          <p>Enter patient Health ID and request access</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" id="step3-num">3</div>
+        <div class="step-content">
+          <h3>Patient Approves</h3>
+          <p>Patient logs in to HealthSecure and approves</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" id="step4-num">4</div>
+        <div class="step-content">
+          <h3>Get Consent Token</h3>
+          <p>Retrieve the signed consent token</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" id="step5-num">5</div>
+        <div class="step-content">
+          <h3>Access Records</h3>
+          <p>Use token to securely fetch patient data</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Vendor Authentication</h2>
+      <div class="field">
+        <label>Vendor API Key</label>
+        <input type="text" id="apiKey" placeholder="Paste API key from seed output..." />
+      </div>
+      <div class="field">
+        <label>Backend URL</label>
+        <input type="text" id="backendUrl" value="http://localhost:5000" />
+      </div>
+      <button class="btn btn-primary" onclick="verifyVendor()" style="width:100%">Verify Vendor Identity</button>
+      <div id="vendor-info" style="margin-top:12px; display:none;">
+        <div class="alert alert-success" id="vendor-alert"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Seed Hint</h2>
+      <p style="font-size:12px; color:#64748b; line-height:1.6;">
+        Run the seed script first:<br/>
+        <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:11px;">node backend/scripts/seed.js</code><br/><br/>
+        It will print API keys for <strong>Apollo Hospital</strong> and <strong>CityLab Diagnostics</strong> and the demo patient's Health ID.<br/><br/>
+        Then paste the API key above and the Health ID in the consent request.
+      </p>
+    </div>
+  </div>
+
+  <!-- MAIN PANEL -->
+  <div class="main-panel">
+
+    <!-- STEP 2: Request Consent -->
+    <div class="panel">
+      <div class="panel-title">Step 2 — Request Patient Consent</div>
+      <div class="panel-desc">As a vendor, request access to a patient's health records. The patient will receive a notification to approve or deny.</div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Patient Health ID *</label>
+          <input type="text" id="req-healthId" placeholder="e.g. ABHA-1234-5678-9012" />
+        </div>
+        <div class="field">
+          <label>Purpose *</label>
+          <select id="req-purpose">
+            <option value="TREATMENT">TREATMENT</option>
+            <option value="DIAGNOSIS">DIAGNOSIS</option>
+            <option value="LAB_REVIEW">LAB_REVIEW</option>
+            <option value="INSURANCE_CLAIM">INSURANCE_CLAIM</option>
+            <option value="RESEARCH">RESEARCH</option>
+            <option value="PHARMACY">PHARMACY</option>
+            <option value="EMERGENCY">EMERGENCY</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Access From</label>
+          <input type="date" id="req-from" />
+        </div>
+        <div class="field">
+          <label>Access To</label>
+          <input type="date" id="req-to" />
+        </div>
+        <div class="field">
+          <label>Urgency</label>
+          <select id="req-urgency">
+            <option value="ROUTINE">ROUTINE</option>
+            <option value="URGENT">URGENT</option>
+            <option value="EMERGENCY">EMERGENCY</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Requested Record Types (click to toggle) *</label>
+        <div class="tags-grid" id="data-types">
+          <span class="tag tag-inactive" onclick="toggleType(this, 'PRESCRIPTION')">Prescription</span>
+          <span class="tag tag-inactive" onclick="toggleType(this, 'LAB_REPORT')">Lab Report</span>
+          <span class="tag tag-inactive" onclick="toggleType(this, 'DISCHARGE_SUMMARY')">Discharge Summary</span>
+          <span class="tag tag-inactive" onclick="toggleType(this, 'IMAGING')">Imaging</span>
+          <span class="tag tag-inactive" onclick="toggleType(this, 'VACCINATION')">Vaccination</span>
+          <span class="tag tag-inactive" onclick="toggleType(this, 'INSURANCE')">Insurance</span>
+          <span class="tag tag-inactive" onclick="toggleType(this, 'CONSULTATION')">Consultation</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Note to Patient (optional)</label>
+        <textarea id="req-note" placeholder="e.g. Needed for pre-surgery evaluation at Apollo Hospital..."></textarea>
+      </div>
+
+      <div id="req-result"></div>
+      <button class="btn btn-primary" onclick="requestConsent()">Request Consent →</button>
+    </div>
+
+    <!-- STEP 3: Pending Requests Poll -->
+    <div class="panel">
+      <div class="panel-title">Step 3 — Patient Approval</div>
+      <div class="panel-desc">Approve or deny the consent request on behalf of the patient for demo purposes, or switch to the patient portal to do it manually.</div>
+
+      <div class="field">
+        <label>Request Reference (auto-filled after Step 2)</label>
+        <input type="text" id="poll-ref" placeholder="CR-1234567890-ABCDEF" />
+      </div>
+
+      <!-- Demo quick-action panel -->
+      <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:16px; margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:#15803d; margin-bottom:10px;">⚡ Demo Quick Action — Approve or Deny as Patient</div>
+        <div class="grid2">
+          <div class="field" style="margin-bottom:8px;">
+            <label>Patient Email</label>
+            <input type="email" id="demo-email" value="demo@healthsecure.test" />
+          </div>
+          <div class="field" style="margin-bottom:8px;">
+            <label>Patient Password</label>
+            <input type="password" id="demo-password" value="Demo@1234" />
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+          <button class="btn btn-success" onclick="demoApprove()" id="demo-approve-btn">✓ Approve Consent</button>
+          <button class="btn btn-danger" onclick="demoDeny()" id="demo-deny-btn">✗ Deny Consent</button>
+        </div>
+      </div>
+
+      <div id="poll-result"></div>
+      <details style="margin-top:8px;">
+        <summary style="font-size:12px; color:#64748b; cursor:pointer;">Manual check / patient portal</summary>
+        <div style="padding:10px 0 0;">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="checkConsentStatus()">Check Status</button>
+            <button class="btn btn-outline btn-sm" onclick="startPolling()" id="poll-btn">Auto-poll every 5s</button>
+            <button class="btn btn-outline btn-sm" onclick="stopPolling()" id="stop-poll-btn" style="display:none;">Stop</button>
+          </div>
+          <p style="font-size:11px; color:#94a3b8; margin-top:8px;">Or open <a href="http://localhost:3000" target="_blank">localhost:3000</a> → Consent tab → Approve manually</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- STEP 4: Get Consent Token -->
+    <div class="panel">
+      <div class="panel-title">Step 4 — Consent Token</div>
+      <div class="panel-desc">Once approved, a cryptographically signed consent token is issued. This token proves the patient's authorization.</div>
+
+      <div class="field">
+        <label>Request ID (auto-filled)</label>
+        <input type="text" id="token-requestId" placeholder="UUID of the approved request" />
+      </div>
+      <div id="token-result"></div>
+      <button class="btn btn-primary" onclick="getConsentToken()">Validate &amp; Get Token</button>
+
+      <div id="token-display" style="display:none; margin-top:16px;">
+        <label style="font-size:12px; font-weight:500; color:#64748b; display:block; margin-bottom:6px;">Consent Token (copy for Step 5)</label>
+        <div class="token-box" id="token-value"></div>
+        <div style="margin-top:8px; display:flex; gap:8px;">
+          <button class="btn btn-sm btn-outline" onclick="copyToken()">Copy Token</button>
+          <span id="token-meta" style="font-size:11px; color:#64748b; align-self:center;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Access Records -->
+    <div class="panel">
+      <div class="panel-title">Step 5 — Access Patient Records</div>
+      <div class="panel-desc">Use the consent token to securely fetch the patient's health records. Access is scope-limited to approved data types only.</div>
+
+      <div class="field">
+        <label>Consent Token *</label>
+        <textarea id="access-token" rows="3" placeholder="Paste consent token from Step 4..."></textarea>
+      </div>
+      <div class="field">
+        <label>Patient Health ID *</label>
+        <input type="text" id="access-healthId" placeholder="e.g. ABHA-1234-5678-9012" />
+      </div>
+
+      <div id="access-result"></div>
+      <button class="btn btn-success" onclick="accessRecords()">Access Records →</button>
+
+      <div id="records-display" style="margin-top:20px; display:none;">
+        <div class="divider"></div>
+        <h3 style="font-size:14px; font-weight:600; color:#1e293b; margin-bottom:12px;">Retrieved Health Records</h3>
+        <div id="records-list"></div>
+      </div>
+    </div>
+
+    <!-- Vendor Audit Log -->
+    <div class="panel">
+      <div class="panel-title">Vendor Activity Log (this session)</div>
+      <div id="audit-log" style="font-size:12px; color:#64748b; font-family:monospace;">
+        <p style="color:#94a3b8;">— No activity yet —</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let pollingInterval = null;
+  let selectedTypes = [];
+  let currentConsentToken = null;
+  let currentRequestId = null;
+
+  // ─── Audit log ────────────────────────────────────────
+  function log(msg, type = 'info') {
+    const el = document.getElementById('audit-log');
+    const time = new Date().toLocaleTimeString();
+    const color = { info: '#64748b', success: '#15803d', error: '#b91c1c', warn: '#92400e' }[type];
+    const prefix = { info: '→', success: '✓', error: '✗', warn: '⚠' }[type];
+    if (el.querySelector('p')) el.innerHTML = '';
+    el.innerHTML = `<div style="color:${color}; padding:3px 0;">${time} ${prefix} ${msg}</div>` + el.innerHTML;
+  }
+
+  // ─── Helper ───────────────────────────────────────────
+  function getKey() { return document.getElementById('apiKey').value.trim(); }
+  function getBase() { return document.getElementById('backendUrl').value.trim().replace(/\/$/, ''); }
+
+  async function apiFetch(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json', 'x-api-key': getKey(), ...(opts.headers || {}) };
+    const res = await fetch(getBase() + '/api/v1' + path, { ...opts, headers });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  function showAlert(containerId, msg, type = 'info') {
+    document.getElementById(containerId).innerHTML = `<div class="alert alert-${type}" style="margin-bottom:12px;">${msg}</div>`;
+  }
+
+  // ─── Toggle data types ────────────────────────────────
+  function toggleType(el, type) {
+    if (selectedTypes.includes(type)) {
+      selectedTypes = selectedTypes.filter(t => t !== type);
+      el.className = 'tag tag-inactive';
+    } else {
+      selectedTypes.push(type);
+      el.className = 'tag tag-active';
+    }
+  }
+
+  // ─── Step 1: Verify Vendor ─────────────────────────────
+  async function verifyVendor() {
+    if (!getKey()) { alert('Enter an API key first'); return; }
+    log('Verifying vendor API key...');
+    const { ok, data } = await apiFetch('/vendors/').catch(err => ({ ok: false, data: { error: err.message } }));
+    if (ok) {
+      document.getElementById('vendor-info').style.display = 'block';
+      document.getElementById('vendor-alert').textContent = '✓ API key is valid — Vendor authenticated';
+      document.getElementById('step1-num').className = 'step-num done';
+      log('Vendor authenticated successfully', 'success');
+    } else {
+      // Try to hit a protected route to validate key
+      const r = await apiFetch('/consent/validate', { method: 'POST', body: JSON.stringify({ tokenRef: 'test' }) });
+      if (r.status === 400 || r.status === 200 || r.status === 404) {
+        document.getElementById('vendor-info').style.display = 'block';
+        document.getElementById('vendor-alert').textContent = '✓ API key is valid — Vendor authenticated';
+        document.getElementById('step1-num').className = 'step-num done';
+        log('Vendor authenticated successfully', 'success');
+      } else {
+        showAlert('vendor-info', '✗ Invalid API key: ' + (data.error || 'Unknown error'), 'error');
+        document.getElementById('vendor-info').style.display = 'block';
+        log('Vendor auth failed: ' + (data.error || ''), 'error');
+      }
+    }
+  }
+
+  // ─── Step 2: Request Consent ───────────────────────────
+  async function requestConsent() {
+    const healthId = document.getElementById('req-healthId').value.trim();
+    const purpose = document.getElementById('req-purpose').value;
+    const from = document.getElementById('req-from').value;
+    const to = document.getElementById('req-to').value;
+    const urgency = document.getElementById('req-urgency').value;
+    const note = document.getElementById('req-note').value.trim();
+
+    if (!healthId) { showAlert('req-result', 'Patient Health ID is required', 'error'); return; }
+    if (!getKey()) { showAlert('req-result', 'Set Vendor API Key first (Step 1)', 'error'); return; }
+    if (selectedTypes.length === 0) { showAlert('req-result', 'Select at least one record type', 'error'); return; }
+
+    log(`Requesting consent from patient ${healthId} for ${purpose}...`);
+
+    const payload = {
+      healthId, purpose,
+      requestedDataTypes: selectedTypes,
+      urgency,
+      ...(from && { requestedFrom: from }),
+      ...(to && { requestedTo: to }),
+      ...(note && { requesterNote: note }),
+    };
+
+    const { ok, data } = await apiFetch('/consent/request', { method: 'POST', body: JSON.stringify(payload) });
+
+    if (ok) {
+      showAlert('req-result',
+        `✓ Consent request submitted!<br/>
+        <strong>Reference:</strong> <code>${data.requestRef}</code><br/>
+        <strong>Request ID:</strong> <code style="font-size:11px;">${data.requestId}</code><br/>
+        <small>Patient will see this in their HealthSecure portal (localhost:3000 → Consent tab)</small>`,
+        'success');
+      document.getElementById('poll-ref').value = data.requestRef;
+      document.getElementById('token-requestId').value = data.requestId;
+      document.getElementById('access-healthId').value = healthId;
+      currentRequestId = data.requestId;
+      document.getElementById('step2-num').className = 'step-num done';
+      document.getElementById('step3-num').className = 'step-num active';
+      log(`Consent request created: ${data.requestRef}`, 'success');
+    } else {
+      showAlert('req-result', '✗ ' + (data.error || 'Failed to request consent'), 'error');
+      log('Consent request failed: ' + (data.error || ''), 'error');
+    }
+  }
+
+  // ─── Step 3: Demo approve/deny ────────────────────────
+  async function demoApprove() {
+    await demoPatientAction('approve');
+  }
+  async function demoDeny() {
+    await demoPatientAction('deny');
+  }
+  async function demoPatientAction(action) {
+    const ref = document.getElementById('poll-ref').value.trim();
+    const email = document.getElementById('demo-email').value.trim();
+    const password = document.getElementById('demo-password').value.trim();
+    if (!ref) { showAlert('poll-result', 'Request reference is required — submit Step 2 first', 'error'); return; }
+    if (!email || !password) { showAlert('poll-result', 'Patient email and password are required', 'error'); return; }
+    if (!getKey()) { showAlert('poll-result', 'Set Vendor API Key first (Step 1)', 'error'); return; }
+
+    const btnId = action === 'approve' ? 'demo-approve-btn' : 'demo-deny-btn';
+    document.getElementById(btnId).disabled = true;
+    document.getElementById(btnId).textContent = action === 'approve' ? 'Approving...' : 'Denying...';
+    log(`Demo: ${action}ing consent request ${ref} as patient ${email}...`);
+
+    const { ok, data } = await apiFetch('/demo/patient-action', {
+      method: 'POST',
+      body: JSON.stringify({ requestRef: ref, action, patientEmail: email, patientPassword: password }),
+    });
+
+    document.getElementById(btnId).disabled = false;
+    document.getElementById(btnId).textContent = action === 'approve' ? '✓ Approve Consent' : '✗ Deny Consent';
+
+    if (ok) {
+      if (action === 'approve') {
+        showAlert('poll-result',
+          `✓ Consent <strong>APPROVED</strong> by patient!<br/>
+          <small>Token: <code>${data.tokenRef}</code></small><br/>
+          <small>Vendor: ${data.vendorName || ''} &nbsp;|&nbsp; Valid until: ${data.validUntil ? new Date(data.validUntil).toLocaleString() : 'N/A'}</small>`,
+          'success');
+        // Auto-fill Step 4 and 5
+        document.getElementById('token-requestId').value = data.requestId || ref;
+        document.getElementById('token-value').textContent = data.tokenRef;
+        document.getElementById('access-token').value = data.tokenRef;
+        document.getElementById('token-display').style.display = 'block';
+        document.getElementById('token-meta').textContent = `Expires: ${data.validUntil ? new Date(data.validUntil).toLocaleString() : 'N/A'}`;
+        currentConsentToken = data.tokenRef;
+        document.getElementById('step3-num').className = 'step-num done';
+        document.getElementById('step4-num').className = 'step-num done';
+        document.getElementById('step5-num').className = 'step-num active';
+        showAlert('token-result', '✓ Token auto-filled from demo approval!', 'success');
+        log(`Consent APPROVED — token: ${data.tokenRef.substring(0, 24)}...`, 'success');
+      } else {
+        showAlert('poll-result', '✗ Consent <strong>DENIED</strong> by patient.', 'error');
+        document.getElementById('step3-num').className = 'step-num done';
+        log('Consent DENIED by patient', 'warn');
+      }
+    } else {
+      showAlert('poll-result', `✗ Demo action failed: ${data.error || 'Unknown error'}`, 'error');
+      log(`Demo ${action} failed: ${data.error || ''}`, 'error');
+    }
+  }
+
+  // ─── Step 3: Check Status ──────────────────────────────
+  async function checkConsentStatus() {
+    const ref = document.getElementById('poll-ref').value.trim();
+    if (!ref) { showAlert('poll-result', 'Enter a request reference', 'error'); return; }
+
+    const { ok, data } = await apiFetch(`/consent/request-status/${ref}`, { method: 'GET' });
+
+    if (ok) {
+      const s = data.status;
+      const color = s === 'APPROVED' ? 'success' : s === 'DENIED' ? 'error' : 'warning';
+      showAlert('poll-result',
+        `Status: <strong class="status-badge status-${s}">${s}</strong>` +
+        (data.respondedAt ? `<br/><small>Responded: ${new Date(data.respondedAt).toLocaleString()}</small>` : '<br/><small>Awaiting patient response...</small>'),
+        color);
+
+      if (s === 'APPROVED') {
+        stopPolling();
+        document.getElementById('step3-num').className = 'step-num done';
+        document.getElementById('step4-num').className = 'step-num active';
+        log(`Consent APPROVED by patient for ref ${ref}`, 'success');
+      } else if (s === 'DENIED') {
+        stopPolling();
+        log(`Consent DENIED by patient for ref ${ref}`, 'error');
+      } else {
+        log(`Consent status: ${s} (pending)`, 'warn');
+      }
+    } else {
+      // Fallback: vendor can't directly query status, suggest patient approval
+      showAlert('poll-result',
+        `<strong>Waiting for patient...</strong><br/>
+        Ask the patient to:<br/>
+        1. Open <a href="http://localhost:3000" target="_blank">localhost:3000</a><br/>
+        2. Go to <strong>Consent</strong> tab<br/>
+        3. Find request <strong>${ref}</strong><br/>
+        4. Click <strong>Approve</strong>`,
+        'info');
+      log('Status check — patient action required', 'warn');
+    }
+  }
+
+  let pollCount = 0;
+  function startPolling() {
+    if (pollingInterval) return;
+    document.getElementById('poll-btn').style.display = 'none';
+    document.getElementById('stop-poll-btn').style.display = 'inline-block';
+    pollCount = 0;
+    pollingInterval = setInterval(async () => {
+      pollCount++;
+      await checkConsentStatus();
+      if (pollCount > 60) stopPolling(); // Max 5 min
+    }, 5000);
+    checkConsentStatus();
+    log('Auto-polling started (every 5s)');
+  }
+
+  function stopPolling() {
+    if (pollingInterval) { clearInterval(pollingInterval); pollingInterval = null; }
+    document.getElementById('poll-btn').style.display = 'inline-block';
+    document.getElementById('stop-poll-btn').style.display = 'none';
+  }
+
+  // ─── Step 4: Get Consent Token ─────────────────────────
+  async function getConsentToken() {
+    const requestId = document.getElementById('token-requestId').value.trim();
+    if (!requestId) { showAlert('token-result', 'Enter the Request ID', 'error'); return; }
+
+    // Try validating via the consent validate endpoint
+    // First we need to get the token ref from the active consents
+    // The token is stored in consent_tokens table — vendor retrieves it via validate
+    const { ok, data } = await apiFetch('/consent/my-token/' + requestId, { method: 'GET' });
+
+    if (ok && data.tokenRef) {
+      showAlert('token-result', '✓ Consent token retrieved successfully!', 'success');
+      currentConsentToken = data.tokenRef;
+      document.getElementById('token-display').style.display = 'block';
+      document.getElementById('token-value').textContent = data.tokenRef;
+      document.getElementById('token-meta').textContent = `Expires: ${data.expiresAt ? new Date(data.expiresAt).toLocaleString() : 'N/A'}`;
+      document.getElementById('access-token').value = data.tokenRef;
+      document.getElementById('step4-num').className = 'step-num done';
+      document.getElementById('step5-num').className = 'step-num active';
+      log('Consent token retrieved: ' + data.tokenRef.substring(0, 20) + '...', 'success');
+    } else {
+      showAlert('token-result',
+        `<strong>How to get the token:</strong><br/>
+        After the patient approves, they see a token reference on the Consent page.<br/>
+        The patient can share the token reference with you, OR you can use the validate endpoint:<br/>
+        <code style="font-size:11px;">POST /consent/validate</code> with <code>{ "tokenRef": "TOKEN_REF_HERE" }</code>`,
+        'info');
+      log('Token retrieval — use validate endpoint with token ref from patient', 'warn');
+    }
+  }
+
+  function copyToken() {
+    const token = document.getElementById('token-value').textContent;
+    navigator.clipboard.writeText(token).then(() => {
+      const btn = event.target;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy Token', 2000);
+    });
+  }
+
+  // ─── Step 5: Access Records ────────────────────────────
+  async function accessRecords() {
+    const token = document.getElementById('access-token').value.trim();
+    const healthId = document.getElementById('access-healthId').value.trim();
+
+    if (!token || !healthId) { showAlert('access-result', 'Token and Health ID are required', 'error'); return; }
+
+    log(`Accessing records for patient ${healthId} with consent token...`);
+
+    const { ok, data, status } = await apiFetch('/records/access', {
+      method: 'POST',
+      body: JSON.stringify({ consentToken: token, healthId }),
+    });
+
+    if (ok) {
+      const records = data.records || [];
+      showAlert('access-result',
+        `✓ Access granted! <strong>${records.length} record(s)</strong> retrieved.` +
+        (data.scope ? `<br/><small>Scope: ${data.scope.join(', ')}</small>` : ''),
+        'success');
+
+      document.getElementById('records-display').style.display = 'block';
+      const list = document.getElementById('records-list');
+
+      if (records.length === 0) {
+        list.innerHTML = '<p style="color:#64748b; font-size:13px;">No records found matching the consent scope.</p>';
+      } else {
+        list.innerHTML = records.map(r => {
+          const dateStr = r.record_date
+            ? new Date(r.record_date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+            : '—';
+          const attachments = r.data?.attachments || [];
+          const attachHtml = attachments.length
+            ? `<div style="margin-top:8px; padding:6px 8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px;">
+                <p style="font-size:10px; font-weight:600; color:#64748b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.04em;">📎 Attachments</p>
+                ${attachments.map(a => `<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                  <span style="font-size:11px;">📄</span>
+                  <span style="font-size:11px;color:#334155;font-weight:500;">${a.name}</span>
+                  <span style="font-size:10px;color:#94a3b8;">${a.size}</span>
+                </div>`).join('')}
+              </div>`
+            : '';
+          return `
+          <div class="record-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span class="record-type ${r.record_type}">${r.record_type}</span>
+                ${r.is_sensitive ? '<span style="font-size:10px;background:#fee2e2;color:#ef4444;padding:2px 6px;border-radius:4px;font-weight:600;">🔒 Sensitive</span>' : ''}
+                ${r.integrity_verified ? '<span style="font-size:10px;background:#dcfce7;color:#16a34a;padding:2px 6px;border-radius:4px;">✓ Verified</span>' : ''}
+              </div>
+              <button onclick="downloadRecord(${JSON.stringify(r).replace(/"/g, '&quot;')})"
+                style="flex-shrink:0;display:flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;color:#475569;font-size:11px;font-weight:600;cursor:pointer;"
+                onmouseover="this.style.background='#eff6ff';this.style.borderColor='#93c5fd';this.style.color='#2563eb'"
+                onmouseout="this.style.background='#f8fafc';this.style.borderColor='#cbd5e1';this.style.color='#475569'">
+                ⬇ Download
+              </button>
+            </div>
+            <h4 style="font-size:14px; font-weight:600; color:#1e293b; margin:6px 0 4px;">${r.title}</h4>
+            ${r.description ? `<p style="font-size:12px; color:#64748b; margin-bottom:8px;">${r.description}</p>` : ''}
+            <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:4px;">
+              <span style="font-size:11px; color:#94a3b8;">📅 ${dateStr}</span>
+              <span style="font-size:11px; color:#94a3b8;">🏥 ${r.vendor_name || 'Self-uploaded'}</span>
+            </div>
+            ${r.tags?.length ? `<div style="margin-top:4px;">${r.tags.map(t => `<span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:2px 6px;border-radius:4px;margin-right:4px;">${t}</span>`).join('')}</div>` : ''}
+            ${attachHtml}
+          </div>`;
+        }).join('');
+      }
+
+      document.getElementById('step5-num').className = 'step-num done';
+      log(`Records accessed: ${records.length} record(s) returned`, 'success');
+    } else {
+      const msg = data.error || 'Access denied';
+      showAlert('access-result', `✗ ${msg}`, 'error');
+      log(`Record access failed (${status}): ${msg}`, 'error');
+    }
+  }
+
+  // ─── Download Record ─────────────────────────────────
+  function downloadRecord(r) {
+    const dateStr = r.record_date
+      ? new Date(r.record_date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+      : '—';
+    const skipKeys = new Set(['attachments']);
+    const dataFields = r.data
+      ? Object.entries(r.data).filter(([k]) => !skipKeys.has(k))
+          .map(([k, v]) => `  ${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join('\n')
+      : '';
+    const attachments = r.data?.attachments?.length
+      ? r.data.attachments.map(a => `  • ${a.name}  (${a.size})${a.note ? ' — ' + a.note : ''}`).join('\n')
+      : '  None';
+    const tags = r.tags?.length ? r.tags.join(', ') : '—';
+
+    const content = `
+╔══════════════════════════════════════════════════════════════╗
+║     HEALTHSECURE — VENDOR ACCESSED HEALTH RECORD EXPORT      ║
+╚══════════════════════════════════════════════════════════════╝
+
+Record Type   : ${r.record_type}
+Title         : ${r.title}
+Date          : ${dateStr}
+Facility      : ${r.vendor_name || 'Self-uploaded'}
+Integrity     : ${r.integrity_verified ? '✓ Verified' : '⚠ Unverified'}
+Tags          : ${tags}
+
+DESCRIPTION
+─────────────────────────────────────────────────────────────
+${r.description || '—'}
+
+RECORD DATA
+─────────────────────────────────────────────────────────────
+${dataFields || '  (no structured data)'}
+
+ATTACHMENTS
+─────────────────────────────────────────────────────────────
+${attachments}
+
+──────────────────────────────────────────────────────────────
+Generated by HealthSecure Platform  |  ${new Date().toLocaleString('en-IN')}
+Access governed by patient consent. Unauthorised redistribution is prohibited.
+`.trimStart();
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = r.data?.attachments?.[0]?.name
+      ? r.data.attachments[0].name.replace(/\.[^.]+$/, '.txt')
+      : `${(r.title || 'record').replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${r.record_date || 'export'}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ─── Init ──────────────────────────────────────────────
+  window.onload = () => {
+    // Pre-fill today + 30 days
+    const today = new Date().toISOString().split('T')[0];
+    const future = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+    document.getElementById('req-from').value = today;
+    document.getElementById('req-to').value = future;
+    document.getElementById('step1-num').className = 'step-num active';
+    log('Vendor Demo Portal loaded. Paste your API key to begin.', 'info');
+  };
+</script>
+</body>
+</html>
